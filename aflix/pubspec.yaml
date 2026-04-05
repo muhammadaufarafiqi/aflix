@@ -19,6 +19,8 @@ dependencies:
   shimmer: ^3.0.0
   carousel_slider: ^5.0.0
   google_fonts: ^6.1.0
+  youtube_player_flutter: ^8.1.2
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

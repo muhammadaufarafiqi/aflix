@@ -40,59 +40,69 @@ class Movie {
   });
 
   // ════════════════════════════════════════════════
-  // GETTERS (UNTUK UI)
+  // GETTERS
   // ════════════════════════════════════════════════
-
-  // Menghubungkan variabel internal ke nama yang sering dipanggil di UI
   String get videoUrl => fullVideoUrl ?? trailerUrl ?? '';
-
   bool get isPremium => contentAccess?.toUpperCase() == 'PREMIUM';
 
   // ════════════════════════════════════════════════
-  // FACTORY FROM JSON (DARI DATABASE KE FLUTTER)
+  // FROM JSON — pakai camelCase sesuai response Spring Boot
   // ════════════════════════════════════════════════
-  factory Movie.fromJson(Map<String, dynamic> j) => Movie(
-    id: j['id'],
-    title: j['title'] ?? '',
-    description: j['description'],
-    // Mengambil dari snake_case MySQL (image_4d4c89.png)
-    thumbnailUrl: j['thumbnail_url'],
-    bannerUrl: j['banner_url'],
-    trailerUrl: j['trailer_url'],
-    fullVideoUrl: j['full_video_url'],
-    releaseYear: j['release_year'],
-    duration: j['duration'],
-    ageRating: j['age_rating'],
-    contentType: j['content_type'],
-    contentAccess: j['content_access'],
-    rating: (j['rating'] as num?)?.toDouble(),
-    isFeatured: j['is_featured'] == 1 || j['is_featured'] == true,
-    isTrending: j['is_trending'] == 1 || j['is_trending'] == true,
-    viewCount: j['view_count'] ?? 0,
-    genres: j['genres'] != null
-        ? (j['genres'] as List).map((g) => Genre.fromJson(g)).toList()
-        : null,
-  );
+  factory Movie.fromJson(Map<String, dynamic> j) {
+    return Movie(
+      id: j['id'] is String ? int.parse(j['id']) : (j['id'] ?? 0),
+      title: j['title']?.toString() ?? '',
+      description: j['description']?.toString(),
+
+      // ✅ camelCase — sesuai response backend Spring Boot
+      thumbnailUrl: j['thumbnailUrl']?.toString(),
+      bannerUrl:    j['bannerUrl']?.toString(),
+      trailerUrl:   j['trailerUrl']?.toString(),
+      fullVideoUrl: j['fullVideoUrl']?.toString(),
+
+      releaseYear: j['releaseYear'] is String
+          ? int.tryParse(j['releaseYear'])
+          : j['releaseYear'],
+      duration:    j['duration']?.toString(),
+      ageRating:   j['ageRating']?.toString(),
+      contentType:   j['contentType']?.toString(),
+      contentAccess: j['contentAccess']?.toString(),
+
+      rating: (j['rating'] as num?)?.toDouble(),
+
+      isFeatured: j['isFeatured'] == 1 || j['isFeatured'] == true || j['isFeatured'] == '1',
+      isTrending: j['isTrending'] == 1 || j['isTrending'] == true || j['isTrending'] == '1',
+
+      viewCount: j['viewCount'] is String
+          ? int.tryParse(j['viewCount']) ?? 0
+          : (j['viewCount'] ?? 0),
+
+      genres: j['genres'] != null
+          ? (j['genres'] as List).map((g) => Genre.fromJson(g)).toList()
+          : null,
+    );
+  }
 
   // ════════════════════════════════════════════════
-  // TO JSON (DARI FLUTTER KE DATABASE/API)
+  // TO JSON — untuk kirim data ke backend
   // ════════════════════════════════════════════════
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'description': description,
-    'thumbnail_url': thumbnailUrl,
-    'banner_url': bannerUrl,
-    'trailer_url': trailerUrl,
-    'full_video_url': fullVideoUrl,
-    'release_year': releaseYear,
-    'duration': duration,
-    'rating': rating,
-    'age_rating': ageRating,
-    'content_type': contentType,
-    'content_access': contentAccess,
-    'is_featured': isFeatured ? 1 : 0,
-    'is_trending': isTrending ? 1 : 0,
+    'id':            id,
+    'title':         title,
+    'description':   description,
+    'thumbnailUrl':  thumbnailUrl,
+    'bannerUrl':     bannerUrl,
+    'trailerUrl':    trailerUrl,
+    'fullVideoUrl':  fullVideoUrl,
+    'releaseYear':   releaseYear,
+    'duration':      duration,
+    'rating':        rating,
+    'ageRating':     ageRating,
+    'contentType':   contentType,
+    'contentAccess': contentAccess,
+    'isFeatured':    isFeatured,
+    'isTrending':    isTrending,
+    'viewCount':     viewCount,
   };
 }
 
@@ -104,8 +114,8 @@ class Genre {
   const Genre({required this.id, required this.name, this.icon});
 
   factory Genre.fromJson(Map<String, dynamic> j) => Genre(
-      id: j['id'],
-      name: j['name'] ?? '',
-      icon: j['icon']
+    id:   j['id'] is String ? int.parse(j['id']) : (j['id'] ?? 0),
+    name: j['name']?.toString() ?? '',
+    icon: j['icon']?.toString(),
   );
 }
