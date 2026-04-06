@@ -34,51 +34,35 @@ class ApiService {
     throw Exception(r.body.isNotEmpty ? r.body : 'Registrasi gagal');
   }
 
-  // --- USER PROFILE (NEW - STEP 5) ---
-
-  // Mengambil data profil user yang sedang login
+  // --- USER PROFILE ---
   Future<Map<String, dynamic>> getMyProfile() async {
     final r = await http.get(Uri.parse('$baseUrl/users/me'), headers: _headers);
-    if (r.statusCode == 200) {
-      return Map<String, dynamic>.from(jsonDecode(r.body));
-    }
+    if (r.statusCode == 200) return Map<String, dynamic>.from(jsonDecode(r.body));
     throw Exception('Gagal mengambil data profil');
   }
 
-  // Mengupdate profil (Nama, Email, Password)
   Future<bool> updateMyProfile({
     required String name,
     required String email,
     String? password,
   }) async {
-    final Map<String, dynamic> body = {
-      'name': name,
-      'email': email,
-    };
-
-    // Jika password diisi, masukkan ke body
-    if (password != null && password.isNotEmpty) {
-      body['password'] = password;
-    }
-
-    final r = await http.put(
-      Uri.parse('$baseUrl/users/update'),
-      headers: _headers,
-      body: jsonEncode(body),
-    );
-
+    final Map<String, dynamic> body = {'name': name, 'email': email};
+    if (password != null && password.isNotEmpty) body['password'] = password;
+    final r = await http.put(Uri.parse('$baseUrl/users/update'),
+        headers: _headers, body: jsonEncode(body));
     return r.statusCode == 200;
   }
 
-  // --- MOVIES CORE ---
+  // --- MOVIES ---
   Future<List<Movie>> _getMovies(String path) async {
     try {
       final r = await http.get(Uri.parse('$baseUrl$path'), headers: _headers);
       if (r.statusCode == 200) {
-        return (jsonDecode(r.body) as List).map((e) => Movie.fromJson(e)).toList();
+        final List<dynamic> data = jsonDecode(r.body); // Tambahan: Pastikan ini List
+        return data.map((e) => Movie.fromJson(e)).toList();
       }
     } catch (e) {
-      debugPrint("Error fetching movies: $e");
+      debugPrint('Error fetching movies: $e');
     }
     return [];
   }
@@ -88,17 +72,26 @@ class ApiService {
   Future<List<Movie>> getTrending()    => _getMovies('/movies/trending');
   Future<List<Movie>> getNewReleases() => _getMovies('/movies/new-releases');
   Future<List<Movie>> getTopViewed()   => _getMovies('/movies/top-viewed');
-
   Future<List<Movie>> search(String q) =>
       _getMovies('/movies/search?q=${Uri.encodeComponent(q)}');
 
   Future<Movie?> getMovieById(int id) async {
-    final r = await http.get(Uri.parse('$baseUrl/movies/$id'), headers: _headers);
-    if (r.statusCode == 200) return Movie.fromJson(jsonDecode(r.body));
+    try {
+      final r = await http.get(Uri.parse('$baseUrl/movies/$id'), headers: _headers);
+      if (r.statusCode == 200) {
+        final dynamic data = jsonDecode(r.body);
+        // Tambahan: Pastikan data bukan string kosong atau null sebelum di-parse
+        if (data != null) {
+          return Movie.fromJson(data as Map<String, dynamic>);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error getMovieById: $e');
+    }
     return null;
   }
 
-  // --- FAVORITES (NEW) ---
+  // --- FAVORITES ---
   Future<List<Movie>> getFavorites() => _getMovies('/favorites');
 
   Future<void> toggleFavorite(int movieId) async {
@@ -106,17 +99,56 @@ class ApiService {
   }
 
   Future<bool> checkFavoriteStatus(int movieId) async {
-    final r = await http.get(Uri.parse('$baseUrl/favorites/$movieId/status'), headers: _headers);
-    if (r.statusCode == 200) return jsonDecode(r.body) as bool;
+    final r = await http.get(
+        Uri.parse('$baseUrl/favorites/$movieId/status'), headers: _headers);
+    if (r.statusCode == 200) {
+      final result = jsonDecode(r.body);
+      return result is bool ? result : false; // Tambahan: Cek tipe data
+    }
     return false;
   }
 
-  // --- VIDEO PLAYER ACTIONS ---
+  // --- DOWNLOADS ✅ ---
+  Future<List<Movie>> getDownloads() => _getMovies('/downloads');
+
+  Future<void> addDownload(int movieId) async {
+    try {
+      await http.post(
+          Uri.parse('$baseUrl/downloads/$movieId'), headers: _headers);
+    } catch (e) {
+      debugPrint('Error addDownload: $e');
+    }
+  }
+
+  Future<void> removeDownload(int movieId) async {
+    try {
+      await http.delete(
+          Uri.parse('$baseUrl/downloads/$movieId'), headers: _headers);
+    } catch (e) {
+      debugPrint('Error removeDownload: $e');
+    }
+  }
+
+  Future<bool> checkDownloadStatus(int movieId) async {
+    try {
+      final r = await http.get(
+          Uri.parse('$baseUrl/downloads/$movieId/status'), headers: _headers);
+      if (r.statusCode == 200) {
+        final result = jsonDecode(r.body);
+        return result is bool ? result : false;
+      }
+    } catch (e) {
+      debugPrint('Error checkDownloadStatus: $e');
+    }
+    return false;
+  }
+
+  // --- VIDEO PLAYER ---
   Future<void> trackView(int id) async {
     try {
       await http.post(Uri.parse('$baseUrl/movies/$id/view'), headers: _headers);
     } catch (e) {
-      debugPrint("Error trackView: $e");
+      debugPrint('Error trackView: $e');
     }
   }
 
@@ -125,9 +157,9 @@ class ApiService {
       final r = await http.post(
           Uri.parse('$baseUrl/movies/$id/progress?seconds=$seconds'),
           headers: _headers);
-      if (r.statusCode != 200) debugPrint("Gagal simpan progress: ${r.body}");
+      if (r.statusCode != 200) debugPrint('Gagal simpan progress: ${r.body}');
     } catch (e) {
-      debugPrint("Error saveProgress: $e");
+      debugPrint('Error saveProgress: $e');
     }
   }
 
@@ -135,26 +167,29 @@ class ApiService {
   Future<Movie> createMovie(Map<String, dynamic> data) async {
     final r = await http.post(Uri.parse('$baseUrl/movies'),
         headers: _headers, body: jsonEncode(data));
-    if (r.statusCode == 200) return Movie.fromJson(jsonDecode(r.body));
+    if (r.statusCode == 200) return Movie.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
     throw Exception('Gagal: ${r.body}');
   }
 
   Future<Movie> updateMovie(int id, Map<String, dynamic> data) async {
     final r = await http.put(Uri.parse('$baseUrl/movies/$id'),
         headers: _headers, body: jsonEncode(data));
-    if (r.statusCode == 200) return Movie.fromJson(jsonDecode(r.body));
+    if (r.statusCode == 200) return Movie.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
     throw Exception('Gagal update film: ${r.body}');
   }
 
   Future<void> deleteMovie(int id) async {
-    final r = await http.delete(Uri.parse('$baseUrl/movies/$id'), headers: _headers);
+    final r = await http.delete(
+        Uri.parse('$baseUrl/movies/$id'), headers: _headers);
     if (r.statusCode != 200) throw Exception('Gagal hapus film');
   }
 
   Future<List<Map<String, dynamic>>> getAdminUsers() async {
-    final r = await http.get(Uri.parse('$baseUrl/admin/users'), headers: _headers);
+    final r = await http.get(
+        Uri.parse('$baseUrl/admin/users'), headers: _headers);
     if (r.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(r.body));
+      final List<dynamic> data = jsonDecode(r.body);
+      return data.cast<Map<String, dynamic>>();
     }
     throw Exception('Gagal ambil data user admin');
   }
@@ -176,15 +211,19 @@ class ApiService {
       http.delete(Uri.parse('$baseUrl/admin/users/$id'), headers: _headers);
 
   Future<Map<String, dynamic>> getDashboardStats() async {
-    final r = await http.get(Uri.parse('$baseUrl/admin/dashboard'), headers: _headers);
-    if (r.statusCode == 200) return Map<String, dynamic>.from(jsonDecode(r.body));
+    final r = await http.get(
+        Uri.parse('$baseUrl/admin/dashboard'), headers: _headers);
+    if (r.statusCode == 200) {
+      return Map<String, dynamic>.from(jsonDecode(r.body));
+    }
     throw Exception('Gagal ambil stats');
   }
 
   Future<List<Map<String, dynamic>>> getGenres() async {
     final r = await http.get(Uri.parse('$baseUrl/genres'), headers: _headers);
     if (r.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(r.body));
+      final List<dynamic> data = jsonDecode(r.body);
+      return data.cast<Map<String, dynamic>>();
     }
     return [];
   }

@@ -37,7 +37,8 @@ class _HomeState extends State<HomeScreen> {
         _DownloadsTab(),
         _ProfileTab(),
       ]),
-      bottomNavigationBar: _BottomNav(current: _tab, onTap: (i) => setState(() => _tab = i)),
+      bottomNavigationBar: _BottomNav(
+          current: _tab, onTap: (i) => setState(() => _tab = i)),
     );
   }
 }
@@ -60,7 +61,8 @@ class _BottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08), width: 0.5)),
+        border: Border(top: BorderSide(
+            color: Colors.white.withOpacity(0.08), width: 0.5)),
       ),
       child: SafeArea(top: false, child: SizedBox(
         height: 60,
@@ -70,11 +72,13 @@ class _BottomNav extends StatelessWidget {
             onTap: () => onTap(i), behavior: HitTestBehavior.opaque,
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Icon(active ? tabs[i].$3 : tabs[i].$2,
-                  color: active ? AppTheme.primary : const Color(0xFF555555), size: 24),
+                  color: active ? AppTheme.primary : const Color(0xFF555555),
+                  size: 24),
               const SizedBox(height: 3),
               Text(tabs[i].$1, style: TextStyle(
                   color: active ? AppTheme.primary : const Color(0xFF555555),
-                  fontSize: 10, fontWeight: active ? FontWeight.w600 : FontWeight.normal)),
+                  fontSize: 10,
+                  fontWeight: active ? FontWeight.w600 : FontWeight.normal)),
             ]),
           ));
         })),
@@ -84,7 +88,7 @@ class _BottomNav extends StatelessWidget {
 }
 
 // ════════════════════════════════════════════════════════════
-// ── HOME TAB (dengan filter genre yang berfungsi) ────────────
+// ── HOME TAB ─────────────────────────────────────────────────
 // ════════════════════════════════════════════════════════════
 class _HomeTab extends StatefulWidget {
   const _HomeTab();
@@ -94,7 +98,6 @@ class _HomeTab extends StatefulWidget {
 class _HomeTabState extends State<_HomeTab> {
   int _selGenre = 0;
 
-  // (label, contentType filter, null = semua)
   final _genres = [
     ('Semua',      null),
     ('Film',       'MOVIE'),
@@ -106,25 +109,26 @@ class _HomeTabState extends State<_HomeTab> {
   @override
   Widget build(BuildContext context) {
     return Consumer<MovieProvider>(builder: (_, movies, __) {
-
-      // ── Filter berdasarkan genre yang dipilih ──
       final filter = _genres[_selGenre].$2;
       List<Movie> allFiltered   = filter == null ? movies.all
-          : movies.all.where((m) => m.contentType?.toUpperCase() == filter).toList();
+          : movies.all.where((m) =>
+      m.contentType?.toUpperCase() == filter).toList();
       List<Movie> trendFiltered = filter == null ? movies.trending
-          : movies.trending.where((m) => m.contentType?.toUpperCase() == filter).toList();
+          : movies.trending.where((m) =>
+      m.contentType?.toUpperCase() == filter).toList();
       List<Movie> newFiltered   = filter == null ? movies.newReleases
-          : movies.newReleases.where((m) => m.contentType?.toUpperCase() == filter).toList();
+          : movies.newReleases.where((m) =>
+      m.contentType?.toUpperCase() == filter).toList();
 
       return CustomScrollView(slivers: [
-        // ── App Bar ──
         SliverAppBar(floating: true, backgroundColor: Colors.transparent,
           title: Row(children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(4)),
-              child: const Text('AFLIX', style: TextStyle(color: Colors.white, fontSize: 18,
-                  fontWeight: FontWeight.w900, letterSpacing: 3)),
+              decoration: BoxDecoration(color: AppTheme.primary,
+                  borderRadius: BorderRadius.circular(4)),
+              child: const Text('AFLIX', style: TextStyle(color: Colors.white,
+                  fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 3)),
             ),
           ]),
           actions: [
@@ -133,7 +137,8 @@ class _HomeTabState extends State<_HomeTab> {
             Consumer<AuthProvider>(builder: (ctx, auth, __) {
               if (auth.user?.isAdmin != true) return const SizedBox.shrink();
               return IconButton(
-                icon: const Icon(Icons.admin_panel_settings, color: AppTheme.primary, size: 26),
+                icon: const Icon(Icons.admin_panel_settings,
+                    color: AppTheme.primary, size: 26),
                 onPressed: () => ctx.push('/admin'),
                 tooltip: 'Admin Panel',
               );
@@ -150,23 +155,19 @@ class _HomeTabState extends State<_HomeTab> {
             context.read<MovieProvider>().refresh(api);
           }))
         else ...[
-            // ── Featured Banner (hanya tampil saat Semua) ──
             if (filter == null && movies.featured.isNotEmpty)
               SliverToBoxAdapter(child: _FeaturedBanner(movies: movies.featured)),
-
-            // ── Genre Filter Chips ──
             SliverToBoxAdapter(child: _GenreChipsBar(
               selected: _selGenre,
               genres: _genres.map((g) => g.$1).toList(),
               onSelect: (i) => setState(() => _selGenre = i),
             )),
-
-            // ── Konten berdasarkan filter ──
             if (allFiltered.isEmpty)
               SliverFillRemaining(child: Center(child: Column(
                 mainAxisAlignment: MainAxisAlignment.center, children: [
                 Container(width: 80, height: 80,
-                    decoration: BoxDecoration(color: AppTheme.card, shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: AppTheme.card,
+                        shape: BoxShape.circle),
                     child: const Icon(Icons.movie_filter_outlined,
                         color: AppTheme.textSecondary, size: 36)),
                 const SizedBox(height: 16),
@@ -187,7 +188,8 @@ class _HomeTabState extends State<_HomeTab> {
                     title: '✨ Baru Rilis', movies: newFiltered)),
               if (allFiltered.isNotEmpty)
                 SliverToBoxAdapter(child: _MovieRow(
-                    title: filter == null ? '🎬 Semua Film' : '🎬 ${_genres[_selGenre].$1}',
+                    title: filter == null
+                        ? '🎬 Semua Film' : '🎬 ${_genres[_selGenre].$1}',
                     movies: allFiltered)),
               const SliverToBoxAdapter(child: SizedBox(height: 90)),
             ],
@@ -197,7 +199,7 @@ class _HomeTabState extends State<_HomeTab> {
   }
 }
 
-// ── GENRE CHIPS BAR (stateless, pakai callback) ──────────────
+// ── GENRE CHIPS BAR ──────────────────────────────────────────
 class _GenreChipsBar extends StatelessWidget {
   final int selected;
   final List<String> genres;
@@ -244,6 +246,7 @@ class _FeaturedBanner extends StatefulWidget {
   const _FeaturedBanner({required this.movies});
   @override State<_FeaturedBanner> createState() => _FeaturedBannerState();
 }
+
 class _FeaturedBannerState extends State<_FeaturedBanner> {
   int _current = 0;
   @override
@@ -268,11 +271,12 @@ class _FeaturedBannerState extends State<_FeaturedBanner> {
                   : Container(color: AppTheme.card),
               Container(decoration: BoxDecoration(gradient: LinearGradient(
                   begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.85)]))),
+                  colors: [Colors.transparent,
+                    Colors.black.withOpacity(0.85)]))),
               Positioned(bottom: 16, left: 16, right: 16, child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(m.title, style: const TextStyle(color: Colors.white, fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                Text(m.title, style: const TextStyle(color: Colors.white,
+                    fontSize: 20, fontWeight: FontWeight.bold),
                     maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 8),
                 Row(children: [
@@ -281,22 +285,29 @@ class _FeaturedBannerState extends State<_FeaturedBanner> {
                       'title': m.title,
                       'videoUrl': m.fullVideoUrl ?? m.trailerUrl,
                       'movieId': m.id}),
-                    icon: const Icon(Icons.play_arrow, size: 18, color: Colors.black),
+                    icon: const Icon(Icons.play_arrow,
+                        size: 18, color: Colors.black),
                     label: const Text('Putar', style: TextStyle(
                         color: Colors.black, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4))),
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
-                    onPressed: () => context.push('/home/movie/${m.id}', extra: m),
-                    icon: const Icon(Icons.info_outline, size: 16, color: Colors.white),
-                    label: const Text('Info', style: TextStyle(color: Colors.white)),
+                    onPressed: () => context.push(
+                        '/home/movie/${m.id}', extra: m),
+                    icon: const Icon(Icons.info_outline,
+                        size: 16, color: Colors.white),
+                    label: const Text('Info',
+                        style: TextStyle(color: Colors.white)),
                     style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.white54),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4))),
                   ),
@@ -352,18 +363,22 @@ class _MovieCard extends StatelessWidget {
         Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(6),
             child: Stack(fit: StackFit.expand, children: [
               (movie.thumbnailUrl != null && movie.thumbnailUrl!.isNotEmpty)
-                  ? CachedNetworkImage(imageUrl: movie.thumbnailUrl!, fit: BoxFit.cover,
+                  ? CachedNetworkImage(imageUrl: movie.thumbnailUrl!,
+                  fit: BoxFit.cover,
                   placeholder: (_, __) => Container(color: AppTheme.card),
                   errorWidget: (_, __, ___) => Container(color: AppTheme.card,
-                      child: const Icon(Icons.movie, color: AppTheme.textSecondary)))
+                      child: const Icon(Icons.movie,
+                          color: AppTheme.textSecondary)))
                   : Container(color: AppTheme.card),
               if (movie.isPremium) Positioned(top: 4, right: 4,
                   child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 2),
                       decoration: BoxDecoration(color: Colors.amber,
                           borderRadius: BorderRadius.circular(3)),
-                      child: const Text('PRO', style: TextStyle(color: Colors.black,
-                          fontSize: 9, fontWeight: FontWeight.bold)))),
+                      child: const Text('PRO', style: TextStyle(
+                          color: Colors.black, fontSize: 9,
+                          fontWeight: FontWeight.bold)))),
             ]))),
         const SizedBox(height: 4),
         Text(movie.title, maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -372,7 +387,8 @@ class _MovieCard extends StatelessWidget {
         if (movie.rating != null) Row(children: [
           const Icon(Icons.star, color: Colors.amber, size: 10),
           Text(' ${movie.rating!.toStringAsFixed(1)}',
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 10)),
+              style: const TextStyle(
+                  color: AppTheme.textSecondary, fontSize: 10)),
         ]),
       ]),
     ),
@@ -384,6 +400,7 @@ class _SearchTab extends StatefulWidget {
   const _SearchTab();
   @override State<_SearchTab> createState() => _SearchTabState();
 }
+
 class _SearchTabState extends State<_SearchTab> {
   final _ctrl  = TextEditingController();
   final _focus = FocusNode();
@@ -414,7 +431,8 @@ class _SearchTabState extends State<_SearchTab> {
             if (f != null) list = list.where((m) =>
             m.contentType?.toUpperCase() == f).toList();
             return Text('${list.length} film',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13));
+                style: const TextStyle(
+                    color: AppTheme.textSecondary, fontSize: 13));
           }),
         ])),
     const SizedBox(height: 12),
@@ -435,11 +453,16 @@ class _SearchTabState extends State<_SearchTab> {
               },
               decoration: InputDecoration(
                   hintText: 'Judul, genre, tahun...',
-                  hintStyle: const TextStyle(color: Color(0xFF555555), fontSize: 14),
-                  prefixIcon: Icon(_active ? Icons.search : Icons.search_outlined,
-                      color: _active ? AppTheme.primary : AppTheme.textSecondary, size: 22),
+                  hintStyle: const TextStyle(
+                      color: Color(0xFF555555), fontSize: 14),
+                  prefixIcon: Icon(
+                      _active ? Icons.search : Icons.search_outlined,
+                      color: _active
+                          ? AppTheme.primary : AppTheme.textSecondary,
+                      size: 22),
                   suffixIcon: _active ? IconButton(
-                      icon: const Icon(Icons.close, color: AppTheme.textSecondary, size: 18),
+                      icon: const Icon(Icons.close,
+                          color: AppTheme.textSecondary, size: 18),
                       onPressed: () {
                         _ctrl.clear(); setState(() => _active = false);
                         context.read<MovieProvider>().search(
@@ -472,7 +495,8 @@ class _SearchTabState extends State<_SearchTab> {
                   child: Text(_genres[i].$1, style: TextStyle(
                       color: active ? Colors.white : AppTheme.textSecondary,
                       fontSize: 12,
-                      fontWeight: active ? FontWeight.w600 : FontWeight.normal)),
+                      fontWeight: active
+                          ? FontWeight.w600 : FontWeight.normal)),
                 ),
               );
             })),
@@ -486,18 +510,21 @@ class _SearchTabState extends State<_SearchTab> {
       if (list.isEmpty) return Center(child: Column(
           mainAxisAlignment: MainAxisAlignment.center, children: [
         Container(width: 80, height: 80,
-            decoration: BoxDecoration(color: AppTheme.card, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: AppTheme.card,
+                shape: BoxShape.circle),
             child: const Icon(Icons.movie_filter_outlined,
                 color: AppTheme.textSecondary, size: 36)),
         const SizedBox(height: 16),
-        Text(_active ? 'Film "${_ctrl.text}" tidak ditemukan'
+        Text(_active
+            ? 'Film "${_ctrl.text}" tidak ditemukan'
             : 'Belum ada film tersedia',
             style: const TextStyle(color: Colors.white, fontSize: 16,
                 fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         const SizedBox(height: 8),
         Text(_active ? 'Coba kata kunci lain'
             : 'Film akan muncul setelah admin menambahkan',
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: const TextStyle(
+                color: AppTheme.textSecondary, fontSize: 13),
             textAlign: TextAlign.center),
       ]));
 
@@ -522,31 +549,38 @@ class _GridMovieCard extends StatelessWidget {
       Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(8),
           child: Stack(fit: StackFit.expand, children: [
             (movie.thumbnailUrl != null && movie.thumbnailUrl!.isNotEmpty)
-                ? CachedNetworkImage(imageUrl: movie.thumbnailUrl!, fit: BoxFit.cover,
+                ? CachedNetworkImage(imageUrl: movie.thumbnailUrl!,
+                fit: BoxFit.cover,
                 placeholder: (_, __) => Container(color: AppTheme.card),
                 errorWidget: (_, __, ___) => Container(color: AppTheme.card,
-                    child: const Icon(Icons.movie, color: Colors.white12, size: 32)))
+                    child: const Icon(Icons.movie,
+                        color: Colors.white12, size: 32)))
                 : Container(color: AppTheme.card,
-                child: const Icon(Icons.movie, color: Colors.white12, size: 32)),
+                child: const Icon(Icons.movie,
+                    color: Colors.white12, size: 32)),
             Positioned(bottom: 0, left: 0, right: 0,
                 child: Container(height: 60, decoration: BoxDecoration(
                     gradient: LinearGradient(
-                        begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                        colors: [Colors.black.withOpacity(0.75), Colors.transparent])))),
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [Colors.black.withOpacity(0.75),
+                          Colors.transparent])))),
             if (movie.isPremium) Positioned(top: 6, right: 6,
                 child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(color: Colors.amber,
                         borderRadius: BorderRadius.circular(4)),
-                    child: const Text('PRO', style: TextStyle(color: Colors.black,
-                        fontSize: 8, fontWeight: FontWeight.bold)))),
+                    child: const Text('PRO', style: TextStyle(
+                        color: Colors.black, fontSize: 8,
+                        fontWeight: FontWeight.bold)))),
             if (movie.rating != null) Positioned(bottom: 6, left: 6,
                 child: Row(children: [
                   const Icon(Icons.star, color: Colors.amber, size: 11),
                   const SizedBox(width: 2),
                   Text(movie.rating!.toStringAsFixed(1),
-                      style: const TextStyle(color: Colors.white, fontSize: 10,
-                          fontWeight: FontWeight.w600)),
+                      style: const TextStyle(color: Colors.white,
+                          fontSize: 10, fontWeight: FontWeight.w600)),
                 ])),
           ]))),
       const SizedBox(height: 5),
@@ -555,7 +589,8 @@ class _GridMovieCard extends StatelessWidget {
               fontWeight: FontWeight.w500)),
       const SizedBox(height: 2),
       Text(movie.contentType ?? '',
-          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 10)),
+          style: const TextStyle(
+              color: AppTheme.textSecondary, fontSize: 10)),
     ]),
   );
 }
@@ -580,29 +615,35 @@ class _FavoritesTab extends StatelessWidget {
               const Spacer(),
               if (favs.isNotEmpty)
                 Text('${favs.length} film',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                    style: const TextStyle(
+                        color: AppTheme.textSecondary, fontSize: 13)),
             ])),
         if (favs.isEmpty)
           Expanded(child: Center(child: Column(
               mainAxisAlignment: MainAxisAlignment.center, children: [
             Container(width: 90, height: 90,
-                decoration: BoxDecoration(color: AppTheme.card, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppTheme.card,
+                    shape: BoxShape.circle),
                 child: const Icon(Icons.favorite_border,
                     color: AppTheme.primary, size: 40)),
             const SizedBox(height: 16),
-            const Text('Belum ada favorit', style: TextStyle(color: Colors.white,
-                fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Belum ada favorit', style: TextStyle(
+                color: Colors.white, fontSize: 18,
+                fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             const Text('Tap ❤️ di halaman detail film\nuntuk menambahkan ke favorit',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13, height: 1.5),
+                style: TextStyle(color: AppTheme.textSecondary,
+                    fontSize: 13, height: 1.5),
                 textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.explore_outlined, size: 18),
                 label: const Text('Jelajahi Film'),
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)))),
           ])))
@@ -610,7 +651,8 @@ class _FavoritesTab extends StatelessWidget {
           Expanded(child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
               itemCount: favs.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppTheme.card),
+              separatorBuilder: (_, __) =>
+              const Divider(height: 1, color: AppTheme.card),
               itemBuilder: (_, i) => _FavMovieTile(movie: favs[i]))),
       ]);
     }));
@@ -628,91 +670,113 @@ class _FavMovieTile extends StatelessWidget {
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         ClipRRect(borderRadius: BorderRadius.circular(8),
             child: SizedBox(width: 80, height: 110,
-                child: (movie.thumbnailUrl != null && movie.thumbnailUrl!.isNotEmpty)
-                    ? CachedNetworkImage(imageUrl: movie.thumbnailUrl!, fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => Container(color: AppTheme.card))
+                child: (movie.thumbnailUrl != null &&
+                    movie.thumbnailUrl!.isNotEmpty)
+                    ? CachedNetworkImage(imageUrl: movie.thumbnailUrl!,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) =>
+                        Container(color: AppTheme.card))
                     : Container(color: AppTheme.card))),
         const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: [
           if (movie.isPremium)
             Container(margin: const EdgeInsets.only(bottom: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: Colors.amber.withOpacity(0.15),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(4)),
-                child: const Text('PREMIUM', style: TextStyle(color: Colors.amber,
-                    fontSize: 9, fontWeight: FontWeight.bold))),
-          Text(movie.title, style: const TextStyle(color: Colors.white, fontSize: 14,
-              fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                child: const Text('PREMIUM', style: TextStyle(
+                    color: Colors.amber, fontSize: 9,
+                    fontWeight: FontWeight.bold))),
+          Text(movie.title, style: const TextStyle(color: Colors.white,
+              fontSize: 14, fontWeight: FontWeight.w600),
+              maxLines: 2, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 4),
           Row(children: [
             if (movie.rating != null) ...[
               const Icon(Icons.star, color: Colors.amber, size: 12),
               Text(' ${movie.rating!.toStringAsFixed(1)}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12,
-                      fontWeight: FontWeight.w500)),
+                  style: const TextStyle(color: Colors.white,
+                      fontSize: 12, fontWeight: FontWeight.w500)),
               const SizedBox(width: 6),
             ],
             Text('${movie.releaseYear ?? ''}',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                style: const TextStyle(
+                    color: AppTheme.textSecondary, fontSize: 12)),
           ]),
           const SizedBox(height: 4),
           Text('${movie.contentType ?? ''} • ${movie.duration ?? ''}',
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+              style: const TextStyle(
+                  color: AppTheme.textSecondary, fontSize: 11)),
           const SizedBox(height: 6),
           if (movie.description != null)
-            Text(movie.description!, maxLines: 2, overflow: TextOverflow.ellipsis,
+            Text(movie.description!, maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: AppTheme.textSecondary,
                     fontSize: 11, height: 1.4)),
         ])),
-        const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
+        const Icon(Icons.chevron_right,
+            color: AppTheme.textSecondary, size: 20),
       ]),
     ),
   );
 }
 
-// ── DOWNLOADS TAB ─────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+// ── DOWNLOADS TAB ✅ (pakai data dari database) ───────────────
+// ════════════════════════════════════════════════════════════
 class _DownloadsTab extends StatelessWidget {
   const _DownloadsTab();
   @override
   Widget build(BuildContext context) {
     return SafeArea(child: Consumer<MovieProvider>(builder: (_, movies, __) {
-      final list = movies.all.where((m) => m.isTrending).toList();
+      // ✅ Pakai movies.downloads (dari database, bukan hardcode)
+      final list = movies.downloads;
 
       return Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
             child: Row(children: [
-              const Icon(Icons.download_done, color: AppTheme.primary, size: 22),
+              const Icon(Icons.download_done,
+                  color: AppTheme.primary, size: 22),
               const SizedBox(width: 8),
               const Text('Unduhan Saya', style: TextStyle(color: Colors.white,
                   fontSize: 22, fontWeight: FontWeight.bold)),
               const Spacer(),
               if (list.isNotEmpty)
-                TextButton.icon(onPressed: () {},
-                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 16),
-                    label: const Text('Hapus semua',
-                        style: TextStyle(color: Colors.red, fontSize: 12))),
+                Text('${list.length} film',
+                    style: const TextStyle(
+                        color: AppTheme.textSecondary, fontSize: 13)),
             ])),
+
         if (list.isEmpty)
           Expanded(child: Center(child: Column(
               mainAxisAlignment: MainAxisAlignment.center, children: [
             Container(width: 90, height: 90,
-                decoration: BoxDecoration(color: AppTheme.card, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: AppTheme.card,
+                    shape: BoxShape.circle),
                 child: const Icon(Icons.download_outlined,
                     color: AppTheme.primary, size: 40)),
             const SizedBox(height: 16),
-            const Text('Belum ada unduhan', style: TextStyle(color: Colors.white,
-                fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Belum ada unduhan', style: TextStyle(
+                color: Colors.white, fontSize: 18,
+                fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('Download film untuk ditonton\ntanpa koneksi internet',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13, height: 1.5),
+            const Text(
+                'Tap tombol Unduh di halaman\ndetail film untuk menyimpan',
+                style: TextStyle(color: AppTheme.textSecondary,
+                    fontSize: 13, height: 1.5),
                 textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.explore_outlined, size: 18),
                 label: const Text('Jelajahi Film'),
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)))),
           ])))
@@ -720,85 +784,135 @@ class _DownloadsTab extends StatelessWidget {
           Expanded(child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
               itemCount: list.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppTheme.card),
-              itemBuilder: (_, i) => _DownloadMovieTile(movie: list[i], index: i))),
+              separatorBuilder: (_, __) =>
+              const Divider(height: 1, color: AppTheme.card),
+              itemBuilder: (_, i) =>
+                  _DownloadMovieTile(movie: list[i], index: i))),
       ]);
     }));
   }
 }
 
-class _DownloadMovieTile extends StatelessWidget {
+class _DownloadMovieTile extends StatefulWidget {
   final Movie movie;
   final int index;
   const _DownloadMovieTile({required this.movie, required this.index});
+  @override State<_DownloadMovieTile> createState() => _DownloadMovieTileState();
+}
+
+class _DownloadMovieTileState extends State<_DownloadMovieTile> {
+  bool _deleting = false;
+
+  Future<void> _delete() async {
+    setState(() => _deleting = true);
+    final api = context.read<AuthProvider>().api;
+    await api.removeDownload(widget.movie.id);
+    if (mounted) {
+      await context.read<MovieProvider>().fetchDownloads(api);
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Film dihapus dari unduhan'),
+              backgroundColor: Colors.red));
+    }
+    if (mounted) setState(() => _deleting = false);
+  }
+
   @override
   Widget build(BuildContext context) => GestureDetector(
-    onTap: () => context.push('/home/movie/${movie.id}', extra: movie),
+    onTap: () => context.push(
+        '/home/movie/${widget.movie.id}', extra: widget.movie),
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Thumbnail dengan overlay
         ClipRRect(borderRadius: BorderRadius.circular(8),
             child: SizedBox(width: 80, height: 110,
                 child: Stack(fit: StackFit.expand, children: [
-                  (movie.thumbnailUrl != null && movie.thumbnailUrl!.isNotEmpty)
-                      ? CachedNetworkImage(imageUrl: movie.thumbnailUrl!, fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => Container(color: AppTheme.card))
+                  (widget.movie.thumbnailUrl != null &&
+                      widget.movie.thumbnailUrl!.isNotEmpty)
+                      ? CachedNetworkImage(
+                      imageUrl: widget.movie.thumbnailUrl!,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) =>
+                          Container(color: AppTheme.card))
                       : Container(color: AppTheme.card),
                   Container(color: Colors.black.withOpacity(0.35)),
                   const Center(child: Icon(Icons.download_done,
                       color: Colors.white, size: 26)),
                 ]))),
         const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(movie.title, style: const TextStyle(color: Colors.white, fontSize: 14,
-              fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
+        // Info
+        Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(widget.movie.title, style: const TextStyle(color: Colors.white,
+              fontSize: 14, fontWeight: FontWeight.w600),
+              maxLines: 2, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 4),
           Row(children: [
-            if (movie.rating != null) ...[
+            if (widget.movie.rating != null) ...[
               const Icon(Icons.star, color: Colors.amber, size: 12),
-              Text(' ${movie.rating!.toStringAsFixed(1)}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12)),
+              Text(' ${widget.movie.rating!.toStringAsFixed(1)}',
+                  style: const TextStyle(
+                      color: Colors.white, fontSize: 12)),
               const SizedBox(width: 6),
             ],
-            Text('${movie.releaseYear ?? ''}',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+            Text('${widget.movie.releaseYear ?? ''}',
+                style: const TextStyle(
+                    color: AppTheme.textSecondary, fontSize: 12)),
           ]),
           const SizedBox(height: 4),
-          Text('${movie.contentType ?? ''} • ${movie.duration ?? ''}',
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+          Text(
+              '${widget.movie.contentType ?? ''} • ${widget.movie.duration ?? ''}',
+              style: const TextStyle(
+                  color: AppTheme.textSecondary, fontSize: 11)),
           const SizedBox(height: 6),
-          if (movie.description != null)
-            Text(movie.description!, maxLines: 2, overflow: TextOverflow.ellipsis,
+          if (widget.movie.description != null)
+            Text(widget.movie.description!, maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: AppTheme.textSecondary,
                     fontSize: 11, height: 1.4)),
           const SizedBox(height: 6),
           Row(children: [
-            const Icon(Icons.storage_outlined, color: AppTheme.textSecondary, size: 12),
+            const Icon(Icons.storage_outlined,
+                color: AppTheme.textSecondary, size: 12),
             const SizedBox(width: 4),
-            Text('${(index + 1) * 127} MB',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+            Text('${(widget.index + 1) * 127} MB',
+                style: const TextStyle(
+                    color: AppTheme.textSecondary, fontSize: 11)),
           ]),
         ])),
-        PopupMenuButton<String>(
+        // Menu hapus / putar
+        _deleting
+            ? const Padding(
+            padding: EdgeInsets.all(12),
+            child: SizedBox(width: 20, height: 20,
+                child: CircularProgressIndicator(
+                    color: AppTheme.primary, strokeWidth: 2)))
+            : PopupMenuButton<String>(
           color: AppTheme.surface,
-          icon: const Icon(Icons.more_vert, color: AppTheme.textSecondary, size: 20),
+          icon: const Icon(Icons.more_vert,
+              color: AppTheme.textSecondary, size: 20),
           onSelected: (v) {
-            if (v == 'play') context.push('/home/movie/${movie.id}', extra: movie);
-            if (v == 'delete') ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Film dihapus dari unduhan'),
-                    backgroundColor: Colors.red));
+            if (v == 'play') context.push(
+                '/home/movie/${widget.movie.id}', extra: widget.movie);
+            if (v == 'delete') _delete();
           },
           itemBuilder: (_) => [
-            const PopupMenuItem(value: 'play', child: Row(children: [
-              Icon(Icons.play_arrow, color: Colors.white, size: 16),
-              SizedBox(width: 8),
-              Text('Putar', style: TextStyle(color: Colors.white)),
-            ])),
-            const PopupMenuItem(value: 'delete', child: Row(children: [
-              Icon(Icons.delete_outline, color: Colors.red, size: 16),
-              SizedBox(width: 8),
-              Text('Hapus', style: TextStyle(color: Colors.red)),
-            ])),
+            const PopupMenuItem(value: 'play',
+                child: Row(children: [
+                  Icon(Icons.play_arrow,
+                      color: Colors.white, size: 16),
+                  SizedBox(width: 8),
+                  Text('Putar',
+                      style: TextStyle(color: Colors.white)),
+                ])),
+            const PopupMenuItem(value: 'delete',
+                child: Row(children: [
+                  Icon(Icons.delete_outline,
+                      color: Colors.red, size: 16),
+                  SizedBox(width: 8),
+                  Text('Hapus',
+                      style: TextStyle(color: Colors.red)),
+                ])),
           ],
         ),
       ]),
@@ -821,7 +935,8 @@ class _ProfileTab extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontSize: 36,
                     fontWeight: FontWeight.bold))),
         Container(width: 26, height: 26,
-            decoration: BoxDecoration(color: AppTheme.card, shape: BoxShape.circle,
+            decoration: BoxDecoration(color: AppTheme.card,
+                shape: BoxShape.circle,
                 border: Border.all(color: AppTheme.background, width: 2)),
             child: const Icon(Icons.edit, size: 13, color: Colors.white)),
       ]),
@@ -830,17 +945,21 @@ class _ProfileTab extends StatelessWidget {
           fontSize: 20, fontWeight: FontWeight.bold)),
       const SizedBox(height: 4),
       Text(user?.email ?? '',
-          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+          style: const TextStyle(
+              color: AppTheme.textSecondary, fontSize: 13)),
       const SizedBox(height: 10),
       Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(
-              color: isPremium ? Colors.amber.withOpacity(0.15) : AppTheme.card,
+              color: isPremium
+                  ? Colors.amber.withOpacity(0.15) : AppTheme.card,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: isPremium ? Colors.amber : Colors.white24)),
+              border: Border.all(
+                  color: isPremium ? Colors.amber : Colors.white24)),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             Icon(isPremium ? Icons.star : Icons.star_border,
-                color: isPremium ? Colors.amber : AppTheme.textSecondary, size: 14),
+                color: isPremium ? Colors.amber : AppTheme.textSecondary,
+                size: 14),
             const SizedBox(width: 5),
             Text(isPremium ? 'Premium' : 'Free', style: TextStyle(
                 color: isPremium ? Colors.amber : AppTheme.textSecondary,
@@ -854,8 +973,9 @@ class _ProfileTab extends StatelessWidget {
                     onPressed: () => context.push('/admin'),
                     icon: const Icon(Icons.admin_panel_settings,
                         color: Colors.white, size: 20),
-                    label: const Text('Admin Panel', style: TextStyle(color: Colors.white,
-                        fontWeight: FontWeight.bold, fontSize: 15)),
+                    label: const Text('Admin Panel', style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold,
+                        fontSize: 15)),
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A5F),
                         shape: RoundedRectangleBorder(
@@ -872,15 +992,19 @@ class _ProfileTab extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)),
                 child: Row(children: [
                   const Expanded(child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Upgrade ke Premium', style: TextStyle(color: Colors.white,
-                        fontSize: 15, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 4),
-                    Text('Tonton semua konten tanpa batas',
-                        style: TextStyle(color: Colors.white70, fontSize: 12)),
-                  ])),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Upgrade ke Premium', style: TextStyle(
+                            color: Colors.white, fontSize: 15,
+                            fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text('Tonton semua konten tanpa batas',
+                            style: TextStyle(
+                                color: Colors.white70, fontSize: 12)),
+                      ])),
                   ElevatedButton(onPressed: () {},
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white,
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
                           foregroundColor: AppTheme.primary,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 8),
@@ -900,7 +1024,8 @@ class _ProfileTab extends StatelessWidget {
             _div(),
             _tile(Icons.notifications_outlined, 'Notifikasi', () {}),
             _div(),
-            _tile(Icons.language_outlined, 'Bahasa', () {}, sub: 'Indonesia'),
+            _tile(Icons.language_outlined, 'Bahasa', () {},
+                sub: 'Indonesia'),
             _div(),
             _tile(Icons.help_outline, 'Bantuan', () {}),
             _div(),
@@ -918,18 +1043,23 @@ class _ProfileTab extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12)),
                           title: const Text('Keluar',
                               style: TextStyle(color: Colors.white)),
-                          content: const Text('Yakin ingin keluar dari Aflix?',
-                              style: TextStyle(color: AppTheme.textSecondary)),
+                          content: const Text(
+                              'Yakin ingin keluar dari Aflix?',
+                              style: TextStyle(
+                                  color: AppTheme.textSecondary)),
                           actions: [
                             TextButton(
-                                onPressed: () => Navigator.pop(context, false),
+                                onPressed: () =>
+                                    Navigator.pop(context, false),
                                 child: const Text('Batal')),
                             ElevatedButton(
-                                onPressed: () => Navigator.pop(context, true),
+                                onPressed: () =>
+                                    Navigator.pop(context, true),
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red),
                                 child: const Text('Keluar',
-                                    style: TextStyle(color: Colors.white))),
+                                    style: TextStyle(
+                                        color: Colors.white))),
                           ],
                         ));
                     if (ok == true && context.mounted) {
@@ -937,8 +1067,10 @@ class _ProfileTab extends StatelessWidget {
                       if (context.mounted) context.go('/login');
                     }
                   },
-                  icon: const Icon(Icons.logout, color: Colors.red, size: 18),
-                  label: const Text('Keluar', style: TextStyle(color: Colors.red)),
+                  icon: const Icon(Icons.logout, color: Colors.red,
+                      size: 18),
+                  label: const Text('Keluar',
+                      style: TextStyle(color: Colors.red)),
                   style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.red, width: 0.5),
                       shape: RoundedRectangleBorder(
@@ -948,15 +1080,18 @@ class _ProfileTab extends StatelessWidget {
     ])));
   }
 
-  Widget _tile(IconData icon, String label, VoidCallback onTap, {String? sub}) =>
+  Widget _tile(IconData icon, String label, VoidCallback onTap,
+      {String? sub}) =>
       ListTile(
         leading: Icon(icon, color: AppTheme.textSecondary, size: 22),
-        title: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
+        title: Text(label,
+            style: const TextStyle(color: Colors.white, fontSize: 14)),
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-          if (sub != null) Text(sub,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+          if (sub != null) Text(sub, style: const TextStyle(
+              color: AppTheme.textSecondary, fontSize: 13)),
           const SizedBox(width: 4),
-          const Icon(Icons.chevron_right, color: Color(0xFF444444), size: 20),
+          const Icon(Icons.chevron_right,
+              color: Color(0xFF444444), size: 20),
         ]),
         onTap: onTap,
       );
@@ -973,17 +1108,20 @@ class _ErrorView extends StatelessWidget {
   Widget build(BuildContext context) => Center(child: Padding(
       padding: const EdgeInsets.all(32),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Icon(Icons.wifi_off_outlined, color: AppTheme.textSecondary, size: 64),
+        const Icon(Icons.wifi_off_outlined,
+            color: AppTheme.textSecondary, size: 64),
         const SizedBox(height: 16),
         const Text('Tidak bisa terhubung ke server',
             style: TextStyle(color: Colors.white, fontSize: 18,
                 fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         const SizedBox(height: 8),
         const Text('Pastikan XAMPP & Spring Boot berjalan\ndi port 8080',
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: TextStyle(
+                color: AppTheme.textSecondary, fontSize: 13),
             textAlign: TextAlign.center),
         const SizedBox(height: 24),
         ElevatedButton.icon(onPressed: onRetry,
-            icon: const Icon(Icons.refresh), label: const Text('Coba Lagi')),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Coba Lagi')),
       ])));
 }
